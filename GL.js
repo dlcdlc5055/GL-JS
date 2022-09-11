@@ -738,7 +738,7 @@ class Lib {
     setBackground(color) {
         document.getElementsByTagName("body")[0].style.backgroundColor = color
     }
-    initApp(update, render, fps = 60, w = 0, h = 0, background = "white") {
+    initApp(obj, fps = 60, w = 0, h = 0, background = "white") {
         if (typeof background != 'string')
             throw "Invalid Function Parameter"
         this.setBackground(background)
@@ -847,13 +847,16 @@ class Lib {
         }
         if (isNaN(fps))
             throw "Invalid Function Parameter"
-        const isFunction = (functionToCheck) => {
-            return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+        const isObject = (objToCheck) => {
+            return typeof objToCheck === 'object' && objToCheck !== null
         }
+        const isFunction=(functionToCheck) =>{
+            return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+           }
         if (this.interval != undefined)
             clearInterval(this.interval)
-        if (!isFunction(update) || !isFunction(render))
-            throw 'invalid update or render function';
+        if (!isObject(obj)&& !isFunction(obj.render())&& !isFunction(obj.update()))
+            throw "Invalid Function Parameter"
         initScreen(w, h)
         initRegs()
         const isPossiblePressed = (value, type, forPressed, mouse = false) => {
@@ -1055,8 +1058,8 @@ class Lib {
         window.addEventListener("mouseup", (e) => onMouseUpOrDown(e.buttons, false))
         this.canvas.addEventListener("click", (e) => this.mouse.reg[3] = true)
         this.interval = setInterval(() => {
-            update()
-            render()
+            obj.update()
+            obj.render()
             this.mouse.reg[3] = false
             //keybord
             for (let i = 0; i < this.input.reg_p.length; i++) {
